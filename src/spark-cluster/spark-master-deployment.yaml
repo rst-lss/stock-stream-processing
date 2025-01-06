@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-master
+  template:
+    metadata:
+      labels:
+        app: spark-master
+    spec:
+      containers:
+      - name: spark-master
+        image: bitnami/spark:latest
+        ports:
+        - containerPort: 7077
+        - containerPort: 8080
+        env:
+        - name: SPARK_MODE
+          value: master
+        - name: SPARK_RPC_AUTHENTICATION_ENABLED
+          value: "no"
+        - name: SPARK_RPC_ENCRYPTION_ENABLED
+          value: "no"
+        - name: SPARK_SSL_ENABLED
+          value: "no"
+        - name: SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED
+          value: "no"
+        - name: SPARK_LOCAL_DIRS
+          value: /tmp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-master
+spec:
+  ports:
+  - port: 7077
+    name: rpc
+  - port: 8080
+    name: webui
+  selector:
+    app: spark-master
