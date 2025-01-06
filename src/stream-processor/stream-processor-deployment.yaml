@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-kafka-consumer
+  labels:
+    app: spark-kafka-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: spark-kafka-consumer
+    spec:
+      containers:
+      - name: spark-consumer
+        image: spark-consumer:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SPARK_MASTER_URL
+          value: "spark://spark-master:7077"
