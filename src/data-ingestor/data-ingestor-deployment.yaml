@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-ingestor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-ingestor
+  template:
+    metadata:
+      labels:
+        app: data-ingestor
+    spec:
+      containers:
+        - name: producer
+          image: data-ingestor:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-0.kafka-headless:9092"
