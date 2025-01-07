@@ -13,9 +13,13 @@ spec:
         app: data-ingestor
     spec:
       containers:
-        - name: producer
+        - name: data-ingestor
           image: data-ingestor:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka-0.kafka-headless:9092"
+            - name: KAFKA_TOPIC
+              value: "test-topic"
+            - name: MESSAGE_INTERVAL
+              value: "2"
