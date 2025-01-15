@@ -18,7 +18,9 @@ spec:
         image: bitnami/spark:latest
         ports:
         - containerPort: 7077
+          name: rpc
         - containerPort: 8080
+          name: webui
         env:
         - name: SPARK_MODE
           value: master
@@ -36,7 +38,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spark-master
+  name: spark-master-service
 spec:
   ports:
   - port: 7077
