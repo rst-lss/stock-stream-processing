@@ -1,34 +1,23 @@
+import redis
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
-from pyspark.sql.types import *
 
+spark = SparkSession.builder.appName("StreamProcessor").getOrCreate()
 
-def create_spark_session():
-    return SparkSession.builder.appName("KafkaConsumer").getOrCreate()
+df = (
+    spark.readStream.format("kafka")
+    .option("kafka.bootstrap.servers", "kafka-0.kafka-headless:9092")
+    .option("subscribe", "test-topic")
+    .option("startingOffsets", "latest")
+    .load()
+)
 
+df_string = df.selectExpr("CAST(value AS STRING)")
 
-def process_stream():
-    spark = create_spark_session()
+query = (
+    df_string.writeStream.outputMode("append")
+    .format("console")
+    .option("truncate", False)
+    .start()
+)
 
-    df = (
-        spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", "kafka-0.kafka-headless:9092")
-        .option("subscribe", "test-topic")
-        .load()
-    )
-
-    messages = df.selectExpr("CAST(value AS STRING)")
-
-    query = (
-        messages.writeStream.outputMode("append")
-        .format("text")
-        .option("path", "/app/output")
-        .option("checkpointLocation", "/app/checkpoint")
-        .start()
-    )
-
-    query.awaitTermination()
-
-
-if __name__ == "__main__":
-    process_stream()
+query.awaitTermination()

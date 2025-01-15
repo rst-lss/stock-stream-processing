@@ -1,23 +1,48 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spark-kafka-consumer
+  name: stream-processor
   labels:
-    app: spark-kafka-consumer
+    app: stream-processor
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: spark-kafka-consumer
+      app: stream-processor
   template:
     metadata:
       labels:
-        app: spark-kafka-consumer
+        app: stream-processor
     spec:
       containers:
-      - name: spark-consumer
-        image: spark-consumer:latest
+      - name: stream-processor
+        image: stream-processor:latest
         imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7072
+          name: headless-svc
+        - containerPort: 8082
+          name: web-ui
+        - containerPort: 35635
+          name: block-manager
         env:
         - name: SPARK_MASTER_URL
-          value: "spark://spark-master:7077"
+          value: "spark://spark-master-service:7077"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stream-processor-service
+  labels:
+    app: stream-processor
+spec:
+  selector:
+    app: stream-processor
+  ports:
+  - port: 7072
+    name: headless-svc
+  - port: 8082
+    name: web-ui
+  - port: 35635
+    name: block-manager

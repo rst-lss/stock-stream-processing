@@ -1,10 +1,21 @@
 FROM bitnami/spark:latest
 
-ENV SPARK_APPLICATION_PYTHON_LOCATION /app/stream-processor.py
+ENV SPARK_APPLICATION_PYTHON_LOCATION=/app/stream-processor.py
 
 WORKDIR /app
 
-COPY stream-processor.py /app/
-COPY --chmod=777 stream-processor-deploy.sh /app/
+USER root
+RUN install_packages zip
+USER 1001
 
-ENTRYPOINT ["/app/stream-processor-deploy.sh"]
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt -t dependencies 
+
+WORKDIR /app/dependencies
+RUN zip -r ../dependencies.zip .
+
+WORKDIR /app
+COPY stream-processor.py /app/
+COPY --chmod=555 spark-submit-stream-processor.sh /app/
+
+ENTRYPOINT ["/app/spark-submit-stream-processor.sh"]
