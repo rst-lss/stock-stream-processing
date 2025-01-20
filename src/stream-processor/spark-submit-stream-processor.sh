@@ -15,4 +15,4 @@
     --conf spark.driver.port=7072 \
     --conf spark.driver.blockManager.port=35635 \
     --py-files dependencies.zip \
-    ${SPARK_APPLICATION_PYTHON_LOCATION}
+    /app/stream-processor.py

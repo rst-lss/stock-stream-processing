@@ -1,11 +1,9 @@
 FROM bitnami/spark:latest
 
-ENV SPARK_APPLICATION_PYTHON_LOCATION=/app/stream-processor.py
-
 WORKDIR /app
 
 USER root
-RUN install_packages zip
+RUN install_packages zip nano
 USER 1001
 
 COPY requirements.txt /app/
@@ -18,4 +16,4 @@ WORKDIR /app
 COPY stream-processor.py /app/
 COPY --chmod=555 spark-submit-stream-processor.sh /app/
 
-ENTRYPOINT ["/app/spark-submit-stream-processor.sh"]
+ENTRYPOINT [ "/app/spark-submit-stream-processor.sh" ]
