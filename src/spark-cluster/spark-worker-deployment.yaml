@@ -15,6 +15,7 @@ spec:
       containers:
       - name: spark-worker
         image: bitnami/spark:latest
+        imagePullPolicy: IfNotPresent
         env:
         - name: SPARK_MODE
           value: "worker"
