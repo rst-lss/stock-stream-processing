@@ -8,4 +8,4 @@ WORKDIR /app
 COPY notification.py /app/
 COPY --chmod=555 spark-submit-notification.sh /app/
 
-ENTRYPOINT [ "spark-submit-notification.sh" ]
+CMD [ "/app/spark-submit-notification.sh" ]

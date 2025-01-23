@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-spark = SparkSession.builder.appName("NotificationProcessor").getOrCreate()
+spark = SparkSession.builder.appName("Notification").getOrCreate()
 
 notification_schema = StructType(
     [StructField("type", StringType(), True), StructField("from", IntegerType(), True)]
@@ -18,7 +18,7 @@ def process_batch(df, epoch_id):
     client_socket.connect(("backend-service", 5000))
 
     for msg in messages:
-        socket_message = {"type": msg.type, "from": msg.from_}
+        socket_message = {"type": msg.type, "from": msg["from"]}
         client_socket.send(json.dumps(socket_message).encode())
 
     client_socket.close()
