@@ -20,9 +20,15 @@ spec:
           ports:
             - containerPort: 2181
               name: client
+          readinessProbe:
+            tcpSocket:
+              port: 2181
+            timeoutSeconds: 5
+            periodSeconds: 10
+            initialDelaySeconds: 15
           env:
             - name: ALLOW_ANONYMOUS_LOGIN
-              value: "yes"
+              value: 'yes'
 ---
 apiVersion: v1
 kind: Service

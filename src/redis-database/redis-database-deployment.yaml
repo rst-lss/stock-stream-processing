@@ -4,8 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: redis-data
 spec:
-  accessModes:
-    - ReadWriteOnce
+  accessModes: [ReadWriteOnce]
   resources:
     requests:
       storage: 10Gi
@@ -27,20 +26,20 @@ spec:
         app: redis
     spec:
       containers:
-      - name: redis
-        image: bitnami/redis:latest
-        ports:
-        - containerPort: 6379
-        env:
-        - name: ALLOW_EMPTY_PASSWORD
-          value: "yes"
-        volumeMounts:
-        - name: redis-data
-          mountPath: /bitnami/redis/data
+        - name: redis
+          image: bitnami/redis:latest
+          ports:
+            - containerPort: 6379
+          env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: 'yes'
+          volumeMounts:
+            - name: redis-data
+              mountPath: /bitnami/redis/data
       volumes:
-      - name: redis-data
-        persistentVolumeClaim:
-          claimName: redis-data
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
 ---
 apiVersion: v1
 kind: Service

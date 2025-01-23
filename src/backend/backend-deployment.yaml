@@ -14,9 +14,9 @@ spec:
         app: backend
     spec:
       containers:
-      - name: backend
-        image: backend:latest
-        imagePullPolicy: Never
+        - name: backend
+          image: backend:latest
+          imagePullPolicy: Never
 ---
 apiVersion: v1
 kind: Service

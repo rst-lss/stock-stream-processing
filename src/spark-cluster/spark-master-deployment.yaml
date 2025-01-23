@@ -14,27 +14,27 @@ spec:
         app: spark-master
     spec:
       containers:
-      - name: spark-master
-        image: bitnami/spark:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 7077
-          name: rpc
-        - containerPort: 8080
-          name: webui
-        env:
-        - name: SPARK_MODE
-          value: master
-        - name: SPARK_RPC_AUTHENTICATION_ENABLED
-          value: "no"
-        - name: SPARK_RPC_ENCRYPTION_ENABLED
-          value: "no"
-        - name: SPARK_SSL_ENABLED
-          value: "no"
-        - name: SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED
-          value: "no"
-        - name: SPARK_LOCAL_DIRS
-          value: /tmp
+        - name: spark-master
+          image: bitnami/spark:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7077
+              name: rpc
+            - containerPort: 8080
+              name: webui
+          env:
+            - name: SPARK_MODE
+              value: master
+            - name: SPARK_RPC_AUTHENTICATION_ENABLED
+              value: 'no'
+            - name: SPARK_RPC_ENCRYPTION_ENABLED
+              value: 'no'
+            - name: SPARK_SSL_ENABLED
+              value: 'no'
+            - name: SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED
+              value: 'no'
+            - name: SPARK_LOCAL_DIRS
+              value: /tmp
 ---
 apiVersion: v1
 kind: Service
@@ -42,9 +42,9 @@ metadata:
   name: spark-master-service
 spec:
   ports:
-  - port: 7077
-    name: rpc
-  - port: 8080
-    name: webui
+    - port: 7077
+      name: rpc
+    - port: 8080
+      name: webui
   selector:
     app: spark-master

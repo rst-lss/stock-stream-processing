@@ -55,10 +55,6 @@ else
     print_message "$GREEN" "✓ Minikube is already running"
 fi
 
-# print_message "$YELLOW" "Enabling Ingress addon..."
-# minikube addons enable ingress
-# check_status "Ingress addon enabled"
-
 print_message "$YELLOW" "Switching to Minikube's Docker daemon..."
 eval $(minikube docker-env)
 check_status "Switched to Minikube's Docker daemon"
@@ -80,33 +76,30 @@ docker build -t backend:latest ./src/backend/
 check_status "Docker images built"
 
 print_message "$YELLOW" "Applying Kubernetes configurations..."
+
 kubectl apply -f src/kafka-cluster/zookeeper-deployment.yaml
-sleep 5 
-kubectl apply -f src/kafka-cluster/kafka-deployment.yaml
-sleep 5 
 kubectl apply -f src/spark-cluster/spark-master-deployment.yaml
-sleep 5
-kubectl apply -f src/spark-cluster/spark-worker-deployment.yaml
-sleep 5 
-kubeclt apply -f src/redis-database/redis-database-deployment.yaml
-sleep 5
+kubectl apply -f src/redis-database/redis-database-deployment.yaml
 
+kubectl wait --for=condition=Ready pod -l app=zookeeper
+kubectl apply -f src/kafka-cluster/kafka-deployment.yaml
+
+kubectl wait --for=condition=Ready pod -l app=kafka
 kubectl apply -f src/data-ingestor/data-ingestor-deployment.yaml
-kubectl apply -f src/stream-processor/stream-processor-deployment.yaml
-kubectl apply -f src/notification/notification-deployment.yaml
+
+kubectl wait --for=condition=Ready pod -l app=redis-database
 kubectl apply -f src/backend/backend-deployment.yaml
+
+kubectl wait --for=condition=Ready pod -l app=spark-master
+kubectl apply -f src/spark-cluster/spark-worker-deployment.yaml
+
+kubectl wait --for=condition=Ready pod -l app=spark-worker
+kubectl apply -f src/stream-processor/stream-processor-deployment.yaml
+
+kubectl wait --for=condition=Ready pod -l app=backend
+kubectl apply -f src/notification/notification-deployment.yaml
+
 check_status "Deployment configuration applied"
-
-# kubectl apply -f k8s/ingress.yaml
-# check_status "Ingress configuration applied"
-
-# print_message "$YELLOW" "Waiting for pods to be ready..."
-# kubectl wait --for=condition=ready pod -l app=node-server --timeout=120s
-# check_status "Pods are ready"
-
-# print_message "$YELLOW" "Getting ingress IP..."
-# echo "Service URL:"
-# minikube ip
 
 echo -e "\nPod Status:"
 kubectl get pods
