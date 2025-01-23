@@ -16,4 +16,4 @@ WORKDIR /app
 COPY stream-processor.py /app/
 COPY --chmod=555 spark-submit-stream-processor.sh /app/
 
-ENTRYPOINT [ "/app/spark-submit-stream-processor.sh" ]
+CMD [ "/app/spark-submit-stream-processor.sh" ]
