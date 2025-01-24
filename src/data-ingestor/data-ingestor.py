@@ -1,8 +1,8 @@
 import json
 import os
 import time
-from datetime import datetime
 
+import requests
 from kafka import KafkaProducer
 
 
@@ -15,32 +15,32 @@ def create_producer():
     )
 
 
-def send_message():
-    producer = create_producer()
+def get_bitcoin_price(api_url="https://api.coindesk.com/v1/bpi/currentprice.json"):
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()
 
-    while True:
-        try:
-            message = {
-                "timestamp": datetime.now().isoformat(),
-                "message": "Hello from Python Producer!",
-                "id": int(time.time()),
-            }
+        data = response.json()
+        current_price = data["bpi"]["USD"]["rate"]
+        return {"price_usd": current_price}
 
-            future = producer.send(
-                topic=os.getenv("KAFKA_TOPIC", "test-topic"), value=message
-            )
-
-            record_metadata = future.get(timeout=10)
-            print(
-                f"Message sent to topic {record_metadata.topic} partition {record_metadata.partition} offset {record_metadata.offset}"
-            )
-
-            time.sleep(float(os.getenv("MESSAGE_INTERVAL", "5")))
-
-        except Exception as e:
-            print(f"Error producing message: {str(e)}")
-            time.sleep(5)
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching Bitcoin price: {e}")
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":
-    send_message()
+
+    producer = create_producer()
+
+    while True:
+        bitcoin_price = get_bitcoin_price()
+
+        if "price_usd" in bitcoin_price:
+            producer.send(
+                topic=os.getenv("KAFKA_TOPIC", "bitcoin_prices"), value=bitcoin_price
+            )
+
+        else:
+            print(f"Error: {bitcoin_price['error']}")
+        time.sleep(1)
