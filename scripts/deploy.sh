@@ -75,6 +75,13 @@ print_message "$YELLOW" "Building Backend Docker image..."
 docker build -t backend:latest ./src/backend/
 check_status "Docker images built"
 
+
+print_message "$YELLOW" "Setup Kubectl Secrets..."
+source .env 
+kubectl create secret generic data-ingestor-secret \
+  --from-literal=API_KEY=$API_KEY
+print_message "$YELLOW" "Kubectl Secrets created"
+
 print_message "$YELLOW" "Applying Kubernetes configurations..."
 
 kubectl apply -f src/kafka-cluster/zookeeper-deployment.yaml
