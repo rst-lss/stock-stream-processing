@@ -2,22 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: stream-processor
+  name: stock-analyzer
   labels:
-    app: stream-processor
+    app: stock-analyzer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: stream-processor
+      app: stock-analyzer
   template:
     metadata:
       labels:
-        app: stream-processor
+        app: stock-analyzer
     spec:
       containers:
-        - name: stream-processor
-          image: stream-processor:latest
+        - name: stock-analyzer
+          image: stock-analyzer:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7072
@@ -33,12 +33,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: stream-processor-service
+  name: stock-analyzer-service
   labels:
-    app: stream-processor
+    app: stock-analyzer
 spec:
   selector:
-    app: stream-processor
+    app: stock-analyzer
   ports:
     - port: 7072
       name: headless-svc

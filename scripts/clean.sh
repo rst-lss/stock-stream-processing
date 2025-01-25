@@ -7,7 +7,7 @@ kubectl delete -f src/spark-cluster/spark-master-deployment.yaml
 kubectl delete -f src/spark-cluster/spark-worker-deployment.yaml
 kubectl delete -f src/redis-database/redis-database-deployment.yaml
 kubectl delete -f src/data-ingestor/data-ingestor-deployment.yaml
-kubectl delete -f src/stream-processor/stream-processor-deployment.yaml
+kubectl delete -f src/stock-analyzer/stock-analyzer-deployment.yaml
 kubectl delete -f src/notification/notification-deployment.yaml
 kubectl delete -f src/backend/backend-deployment.yaml
 

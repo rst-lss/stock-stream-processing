@@ -3,7 +3,7 @@ FROM bitnami/spark:latest
 WORKDIR /app
 
 USER root
-RUN install_packages zip nano
+RUN install_packages zip
 USER 1001
 
 COPY requirements.txt /app/
@@ -13,7 +13,8 @@ WORKDIR /app/dependencies
 RUN zip -r ../dependencies.zip .
 
 WORKDIR /app
-COPY stream-processor.py /app/
-COPY --chmod=555 spark-submit-stream-processor.sh /app/
+COPY stock-analyzer.py /app/
+COPY --chmod=555 spark-submit-stock-analyzer.sh /app/
 
-CMD [ "/app/spark-submit-stream-processor.sh" ]
+# CMD [ "/app/spark-submit-stream-processor.sh" ]
+CMD ["sleep", "infinity"]

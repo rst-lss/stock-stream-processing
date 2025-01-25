@@ -63,8 +63,8 @@ print_message "$YELLOW" "Building Data Ingestor Docker image..."
 docker build -t data-ingestor:latest ./src/data-ingestor/
 check_status "Docker images built"
 
-print_message "$YELLOW" "Building Stream Processor Docker image..."
-docker build -t stream-processor:latest ./src/stream-processor/
+print_message "$YELLOW" "Building Stock Analyzer Docker image..."
+docker build -t stock-analyzer:latest ./src/stock-analyzer/
 check_status "Docker images built"
 
 print_message "$YELLOW" "Building Notification Docker image..."
