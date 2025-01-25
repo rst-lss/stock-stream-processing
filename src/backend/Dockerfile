@@ -7,5 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend.py .
 
-# CMD ["python", "/app/backend.py"]
-CMD ["sleep", "infinity"]
+CMD ["python", "/app/backend.py"]
