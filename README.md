@@ -1,4 +1,4 @@
-### Crypto Stream Processing
+### Stock Stream Processing
 
 by: 
 - Amin Haeri
