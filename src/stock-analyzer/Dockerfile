@@ -16,5 +16,4 @@ WORKDIR /app
 COPY stock-analyzer.py /app/
 COPY --chmod=555 spark-submit-stock-analyzer.sh /app/
 
-# CMD [ "/app/spark-submit-stream-processor.sh" ]
-CMD ["sleep", "infinity"]
+CMD [ "/app/spark-submit-stock-analyzer.sh" ]
