@@ -20,7 +20,18 @@ spec:
           env:
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: kafka-0.kafka-headless:9092
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: data-ingestor-secret
+                  key: API_KEY
+            - name: STOCK_SYMBOL
+              value: AAPL
+            - name: DATA_INTERVAL
+              value: 60min
+            - name: KAFKA_BROKER
+              value: kafka-0.kafka-headless:9092
             - name: KAFKA_TOPIC
-              value: test-topic
-            - name: MESSAGE_INTERVAL
-              value: '2'
+              value: stock_data
+            - name: FETCH_INTERVAL
+              value: '60'
