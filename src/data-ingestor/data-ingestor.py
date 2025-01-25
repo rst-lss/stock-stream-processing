@@ -11,7 +11,7 @@ STOCK_SYMBOL = os.getenv("STOCK_SYMBOL", "AAPL")
 DATA_INTERVAL = os.getenv("DATA_INTERVAL", "60min")
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka-0.kafka-headless:9092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "stock_data")
-FETCH_INTERVAL = int(os.getenv("FETCH_INTERVAL", 60))
+FETCH_INTERVAL = int(os.getenv("FETCH_INTERVAL", 30))
 START_DATE = datetime(2009, 2, 1)
 
 producer = KafkaProducer(

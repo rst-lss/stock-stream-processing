@@ -34,4 +34,4 @@ spec:
             - name: KAFKA_TOPIC
               value: stock_data
             - name: FETCH_INTERVAL
-              value: '60'
+              value: '30'
