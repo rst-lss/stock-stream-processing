@@ -1,0 +1,1 @@
+same as the [stock-analyzer-deployment](../stock-analyzer/stock-analyzer-deployment.yaml.md)
