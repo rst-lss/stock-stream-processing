@@ -1,3 +1,4 @@
+import redis
 from pyspark.sql import SparkSession, Window
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
@@ -5,7 +6,7 @@ from pyspark.sql.types import *
 
 # Function to create Spark session
 def create_spark_session():
-    return SparkSession.builder.appName("StreamProcessor").getOrCreate()
+    return SparkSession.builder.appName("StockAnalyzer").getOrCreate()
 
 
 # Function to calculate technical indicators
@@ -63,6 +64,15 @@ def calculate_indicators(df):
     return df
 
 
+# Function to push data to Redis
+def push_to_redis(json_data):
+    try:
+        redis_client = redis.StrictRedis(host="redis", port=6379, db=0)
+        redis_client.rpush("stock_indicators", json_data)
+    except Exception as e:
+        print(f"Error pushing to Redis: {str(e)}")
+
+
 # Batch processing function
 def process_batch(df, epoch_id):
     try:
@@ -105,8 +115,28 @@ def process_batch(df, epoch_id):
         )
 
         kafka_output.write.format("kafka").option(
-            "kafka.bootstrap.servers", "kafka-1.kafka-headless:9092"
+            "kafka.bootstrap.servers", "kafka-b:9092"
         ).option("topic", "stock_indictors").save()
+
+        # Push data to Redis
+        enriched_data = enriched_df.select(
+            to_json(
+                struct(
+                    "timestamp",
+                    "open",
+                    "high",
+                    "low",
+                    "close",
+                    "volume",
+                    "moving_average",
+                    "ema",
+                    "rsi",
+                )
+            ).alias("json_value")
+        ).collect()
+
+        for row in enriched_data:
+            push_to_redis(row.json_value)
 
         print(f"Batch {epoch_id} processed successfully")
 
@@ -114,12 +144,13 @@ def process_batch(df, epoch_id):
         print(f"Error processing batch {epoch_id}: {str(e)}")
 
 
+# Main function
 def main():
     spark = create_spark_session()
 
     df = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", "kafka-0.kafka-headless:9092")
+        .option("kafka.bootstrap.servers", "kafka:9092")
         .option("subscribe", "stock_data")
         .option("startingOffsets", "latest")
         .load()
