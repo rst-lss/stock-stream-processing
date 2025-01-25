@@ -1,11 +1,10 @@
-FROM bitnami/spark:latest
-
-USER root
-RUN install_packages nano
-USER 1001
+FROM python:3.9-slim
 
 WORKDIR /app
-COPY notification.py /app/
-COPY --chmod=555 spark-submit-notification.sh /app/
 
-CMD [ "/app/spark-submit-notification.sh" ]
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY notification.py .
+
+CMD ["python", "/app/notification.py"]

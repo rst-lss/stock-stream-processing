@@ -1,44 +1,72 @@
-import json
-import socket
+import asyncio
+from typing import List
 
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from aiokafka import AIOKafkaConsumer
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-spark = SparkSession.builder.appName("Notification").getOrCreate()
-
-notification_schema = StructType(
-    [StructField("type", StringType(), True), StructField("from", IntegerType(), True)]
-)
+app = FastAPI()
 
 
-def process_batch(df, epoch_id):
-    messages = df.collect()
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(("backend-service", 5000))
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
 
-    for msg in messages:
-        socket_message = {"type": msg.type, "from": msg["from"]}
-        client_socket.send(json.dumps(socket_message).encode())
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
 
-    client_socket.close()
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
 
 
-df = (
-    spark.readStream.format("kafka")
-    .option("kafka.bootstrap.servers", "kafka-1.kafka-headless:9092")
-    .option("subscribe", "notifications")
-    .option("startingOffsets", "latest")
-    .load()
-)
+connection_manager = ConnectionManager()
 
-query = (
-    df.selectExpr("CAST(value AS STRING)")
-    .select(from_json(col("value"), notification_schema).alias("data"))
-    .select("data.*")
-    .writeStream.foreachBatch(process_batch)
-    .outputMode("append")
-    .start()
-)
 
-query.awaitTermination()
+@app.websocket("/ws/notifications")
+async def websocket_endpoint(websocket: WebSocket):
+    await connection_manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        connection_manager.disconnect(websocket)
+
+
+async def consume_kafka_messages():
+    consumer = AIOKafkaConsumer(
+        "trading_signals",
+        bootstrap_servers="kafka-1.kafka-headless:9092",
+        auto_offset_reset="latest",
+    )
+
+    await consumer.start()
+
+    try:
+        async for message in consumer:
+            try:
+                decoded_message = message.value.decode("utf-8")
+                await connection_manager.broadcast(decoded_message)
+            except Exception as e:
+                print(f"Error processing message: {e}")
+    finally:
+        await consumer.stop()
+
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(consume_kafka_messages())
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=5000)
