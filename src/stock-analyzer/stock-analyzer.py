@@ -64,7 +64,6 @@ def calculate_indicators(df):
     return df
 
 
-# Function to push data to Redis
 def push_to_redis(json_data):
     try:
         redis_client = redis.StrictRedis(host="redis", port=6379, db=0)
@@ -73,7 +72,6 @@ def push_to_redis(json_data):
         print(f"Error pushing to Redis: {str(e)}")
 
 
-# Batch processing function
 def process_batch(df, epoch_id):
     try:
         schema = StructType(
@@ -91,13 +89,10 @@ def process_batch(df, epoch_id):
             from_json(col("value").cast("string"), schema).alias("parsed_value")
         ).select("parsed_value.*")
 
-        # Convert timestamp to appropriate format
         parsed_df = parsed_df.withColumn("timestamp", to_timestamp("timestamp"))
 
-        # Calculate technical indicators
         enriched_df = calculate_indicators(parsed_df)
 
-        # Write enriched data back to Kafka
         kafka_output = enriched_df.select(
             to_json(
                 struct(
@@ -115,10 +110,9 @@ def process_batch(df, epoch_id):
         )
 
         kafka_output.write.format("kafka").option(
-            "kafka.bootstrap.servers", "kafka-b:9092"
-        ).option("topic", "stock_indictors").save()
+            "kafka.bootstrap.servers", "kafka-1.kafka-headless:9092"
+        ).option("topic", "stock_indicators").save()
 
-        # Push data to Redis
         enriched_data = enriched_df.select(
             to_json(
                 struct(
@@ -144,13 +138,12 @@ def process_batch(df, epoch_id):
         print(f"Error processing batch {epoch_id}: {str(e)}")
 
 
-# Main function
 def main():
     spark = create_spark_session()
 
     df = (
         spark.readStream.format("kafka")
-        .option("kafka.bootstrap.servers", "kafka:9092")
+        .option("kafka.bootstrap.servers", "kafka-0.kafka-headless:9092")
         .option("subscribe", "stock_data")
         .option("startingOffsets", "latest")
         .load()
