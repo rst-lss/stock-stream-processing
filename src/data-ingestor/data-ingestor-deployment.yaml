@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-ingestor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-ingestor
+  template:
+    metadata:
+      labels:
+        app: data-ingestor
+    spec:
+      containers:
+        - name: data-ingestor
+          image: data-ingestor:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka-0.kafka-headless:9092
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: data-ingestor-secret
+                  key: API_KEY
+            - name: STOCK_SYMBOL
+              value: AAPL
+            - name: MULTIPLIER
+              value: "60"
+            - name: TIMESPAN
+              value: "minute"
+            - name: KAFKA_BROKER
+              value: kafka-0.kafka-headless:9092
+            - name: KAFKA_TOPIC
+              value: stock_data
+            - name: FETCH_INTERVAL
+              value: "30"

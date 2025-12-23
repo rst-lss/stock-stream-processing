@@ -1,0 +1,1 @@
+same as the [spark-submit-stock-analyzer](../stock-analyzer/spark-submit-stock-analyzer.sh.md)

@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-analyzer
+  labels:
+    app: stock-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-analyzer
+  template:
+    metadata:
+      labels:
+        app: stock-analyzer
+    spec:
+      containers:
+        - name: stock-analyzer
+          image: stock-analyzer:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7072
+              name: headless-svc
+            - containerPort: 8082
+              name: web-ui
+            - containerPort: 35635
+              name: block-manager
+          env:
+            - name: SPARK_MASTER_URL
+              value: spark://spark-master-service:7077
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock-analyzer-service
+  labels:
+    app: stock-analyzer
+spec:
+  selector:
+    app: stock-analyzer
+  ports:
+    - port: 7072
+      name: headless-svc
+    - port: 8082
+      name: web-ui
+    - port: 35635
+      name: block-manager
